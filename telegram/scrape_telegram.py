@@ -60,10 +60,16 @@ class TelegramScraper:
         #         f"channel {channel_name} is a new channel, proceed to scraping posts for the last 90 days."
         #     )
 
-        query_params = {"": ""}
+        query_params = {}
 
-        res = self.make_request(channel_name, query_params)
-        print(res)
+        try:
+            res = self.make_request(channel_name, query_params)
+        except Exception as e:
+            print(f"Request failed: {e}")
+            return None
+
+        if not res:
+            return
 
     def make_request(self, endpoint, query_params):
         for i in range(3):
@@ -95,7 +101,14 @@ class TelegramScraper:
     def get_results(self):
         for source in self.sources:
             channel_info = self.get_channel_info(source)
-            print(channel_info)
+
+            # continue_scraping = True
+
+            # while continue_scraping:
+            #     channel_content = self.scrape_channel(
+            #         channel_info["channel_name"], channel_info["channel_label"]
+            #     )
+            #     if not channel_content:
 
 
 # Test
