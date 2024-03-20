@@ -49,6 +49,8 @@ class TelegramScraper:
     def scrape_channel(self, channel_name, channel_label):
         posts_list = []
         continue_scraping = True
+        post_number_before = None
+        query_params = {"before": None}
 
         # # Restrict the number of scraped items
         # if channel_name in explored_channels:
@@ -62,8 +64,6 @@ class TelegramScraper:
         #         f"channel {channel_name} is a new channel, proceed to scraping posts for the last 90 days."
         #     )
 
-        query_params = {}
-
         while continue_scraping:
 
             res = self.make_request(channel_name, query_params)
@@ -72,16 +72,32 @@ class TelegramScraper:
                 return
 
             parsed_html = HTMLParser(res)
-            current_post_number = (
+
+            post_number_query = (
                 parsed_html.css_first("link").attrs["href"].split("before=")
             )
-            print(current_post_number)
+            if len(post_number_query) == 1:
+                print("[!] Channel can't be accessed.")
+                return
+            post_number = post_number_query[1]
+
+            if post_number == post_number_before:
+                print("All posts already scraped. Moving on to next one...")
+                continue_scraping = False
+                continue
+            query_params["before"] = post_number
+            print(post_number)
+
+            if int(post_number) < 1800:
+                return
 
     def make_request(self, endpoint, query_params):
         for i in range(3):
             try:
                 response = requests.get(
-                    f"{self.base_url}/{endpoint}", headers=self.headers
+                    f"{self.base_url}{endpoint}",
+                    headers=self.headers,
+                    params=query_params,
                 )
                 response.raise_for_status()
                 return response.text
@@ -93,29 +109,33 @@ class TelegramScraper:
 
     def get_channel_info(self, telegram_link):
         channel_info = {}
-        channel_info["channel_name"] = (
-            telegram_link.get("url")
-            .split(".me/")[1]
-            .replace("joinchat/", "")
-            .replace("s/", "")
-            .split("/")[0]
-            .split("?")[0]
-            .split("&")[0]
-        )
-        channel_info["channel_label"] = telegram_link.get("label")
-        return channel_info
+        try:
+            channel_info["channel_name"] = (
+                telegram_link.get("url")
+                .split(".me/")[1]
+                .replace("joinchat/", "")
+                .replace("s/", "")
+                .split("/")[0]
+                .split("?")[0]
+                .split("&")[0]
+            )
+            channel_info["channel_label"] = telegram_link.get("label")
+            return channel_info
+        except IndexError:
+            print("[!] {telegram_link} is not a valid telegram link - skipping...")
+            return None
 
     def get_results(self):
         for source in self.sources:
+            print(f"Scraping {source.get('url')}...")
             channel_info = self.get_channel_info(source)
 
-            # continue_scraping = True
+            if not channel_info:
+                continue
 
-            # while continue_scraping:
-            #     channel_content = self.scrape_channel(
-            #         channel_info["channel_name"], channel_info["channel_label"]
-            #     )
-            #     if not channel_content:
+            channel_content = self.scrape_channel(
+                channel_info["channel_name"], channel_info["channel_label"]
+            )
 
 
 # Test
