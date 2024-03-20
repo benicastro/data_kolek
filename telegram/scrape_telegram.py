@@ -6,6 +6,7 @@ import random
 import requests
 import pandas as pd
 from datetime import *
+from selectolax.parser import HTMLParser
 from dataclasses import dataclass, asdict
 
 
@@ -47,6 +48,7 @@ class TelegramScraper:
 
     def scrape_channel(self, channel_name, channel_label):
         posts_list = []
+        continue_scraping = True
 
         # # Restrict the number of scraped items
         # if channel_name in explored_channels:
@@ -62,14 +64,18 @@ class TelegramScraper:
 
         query_params = {}
 
-        try:
-            res = self.make_request(channel_name, query_params)
-        except Exception as e:
-            print(f"Request failed: {e}")
-            return None
+        while continue_scraping:
 
-        if not res:
-            return
+            res = self.make_request(channel_name, query_params)
+
+            if not res:
+                return
+
+            parsed_html = HTMLParser(res)
+            current_post_number = (
+                parsed_html.css_first("link").attrs["href"].split("before=")
+            )
+            print(current_post_number)
 
     def make_request(self, endpoint, query_params):
         for i in range(3):
@@ -80,8 +86,9 @@ class TelegramScraper:
                 response.raise_for_status()
                 return response.text
             except requests.RequestException as err:
-                print(f"Error making request: {err}")
-                continue
+                print(
+                    f"Error response {err.response.status_code} while requesting {err.request.url!r}."
+                )
             return None
 
     def get_channel_info(self, telegram_link):
