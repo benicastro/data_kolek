@@ -34,6 +34,7 @@ class TelegramScraper:
         self.sources = telegram_sources
 
     def get_useragent(self):
+        """This function returns a random user agent from a specified list for header purposes."""
         useragent_list = [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
@@ -98,6 +99,7 @@ class TelegramScraper:
 
             for i, post in enumerate(posts):
 
+                # Extract post text information
                 try:
                     text_node = post.css_first(
                         "div.tgme_widget_message_text.js-message_text"
@@ -107,7 +109,7 @@ class TelegramScraper:
                     else:
                         post_text = text_node.text()
                 except Exception as err:
-                    post_text = None
+                    post_text = "null"
 
                 username = ""
                 username_link = ""
@@ -135,6 +137,7 @@ class TelegramScraper:
                     return posts_list
 
     def make_request(self, endpoint, query_params):
+        """This function attempts to make an http request given the endpoint and query parameters. It returns the response in text format."""
         for i in range(3):
             try:
                 response = requests.get(
@@ -151,6 +154,7 @@ class TelegramScraper:
             return None
 
     def get_channel_info(self, telegram_link):
+        """This function obtains the channel name and channel label from the given telegram link source."""
         channel_info = {}
         try:
             channel_info["channel_name"] = (
@@ -195,6 +199,7 @@ class TelegramScraper:
         return new_entry
 
     def get_results(self):
+        """This function outputs the result of the scraping process."""
         for source in self.sources:
             print(f"Scraping {source.get('url')}...")
             channel_info = self.get_channel_info(source)
