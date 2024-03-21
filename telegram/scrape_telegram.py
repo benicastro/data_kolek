@@ -2,10 +2,11 @@
 from telegram_source import telegram_links
 
 # Import modules/libraries
+import time
 import random
 import requests
+import datetime
 import pandas as pd
-from datetime import *
 from selectolax.parser import HTMLParser
 from dataclasses import dataclass, asdict
 
@@ -26,12 +27,13 @@ class PostInfo:
 
 # Create TelegramScraper class
 class TelegramScraper:
-    def __init__(self, telegram_sources):
+    def __init__(self, telegram_sources, posts_per_source):
         self.base_url = "https://t.me/s/"
         self.headers = {
             "User-Agent": self.get_useragent(),
         }
         self.sources = telegram_sources
+        self.posts_limit = posts_per_source
 
     def get_useragent(self):
         """This function returns a random user agent from a specified list for header purposes."""
@@ -132,9 +134,13 @@ class TelegramScraper:
 
                 posts_list.append(asdict(entry))
 
-                if int(post_number) < 1800:
+                if len(posts_list) == self.posts_limit:
                     print(f"{len(posts_list)} posts returned.")
                     return posts_list
+
+            time.sleep(
+                random.randint(1, 3)
+            )  # Limit request frequency per post batch identifier
 
     def make_request(self, endpoint, query_params):
         """This function attempts to make an http request given the endpoint and query parameters. It returns the response in text format."""
@@ -200,6 +206,7 @@ class TelegramScraper:
 
     def get_results(self):
         """This function outputs the result of the scraping process."""
+        scraping_results = []
         for source in self.sources:
             print(f"Scraping {source.get('url')}...")
             channel_info = self.get_channel_info(source)
@@ -211,11 +218,16 @@ class TelegramScraper:
                 channel_info["channel_name"], channel_info["channel_label"]
             )
 
-        return channel_content
+            print("###################################################################")
+
+            if channel_content:
+                scraping_results.extend(channel_content)
+
+        return scraping_results
 
 
 # Test
-telegram_scraper = TelegramScraper([telegram_links[0]])
+telegram_scraper = TelegramScraper(telegram_links[:3], 25)
 scraped_data = telegram_scraper.get_results()
 df = pd.DataFrame(scraped_data)
 print(df)
