@@ -113,12 +113,18 @@ class TelegramScraper:
                 except Exception as err:
                     post_text = "null"
 
+                # Extract the mentioned urls in the post
+                extracted_urls = []
+                a_tags = text_node.css("a")
+                if a_tags:
+                    for tag in a_tags:
+                        extracted_urls.append(tag.attrs["href"])
+
                 username = ""
                 username_link = ""
                 post_link = ""
                 date = ""
                 number_of_views = 0
-                extracted_urls = []
 
                 entry = self.get_entry(
                     channel_name=channel_name,
@@ -230,4 +236,5 @@ class TelegramScraper:
 telegram_scraper = TelegramScraper(telegram_links[:3], 25)
 scraped_data = telegram_scraper.get_results()
 df = pd.DataFrame(scraped_data)
+df.to_csv("scraped_output.csv", encoding="utf-8", index=False)
 print(df)
