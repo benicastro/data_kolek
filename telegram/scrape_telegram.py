@@ -142,6 +142,7 @@ class TelegramScraper:
                 except Exception as err:
                     number_of_views = 0
 
+                post_link_date = post.css_first("a.tgme_widget_message_date")
                 post_link = ""
                 date = ""
 
