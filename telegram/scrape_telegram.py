@@ -127,10 +127,18 @@ class TelegramScraper:
                 username = username_link.split("t.me/")[-1]
 
                 # Extract number of views
+                units = {
+                    "K": 1000,
+                    "M": 1000000,
+                    "B": 1000000000,
+                }  # Create dictionary representing the values for each letter
                 try:
-                    number_of_views = post.css_first(
-                        "span.tgme_widget_message_views"
-                    ).text()
+                    views_raw = post.css_first("span.tgme_widget_message_views").text()
+                    try:
+                        number_of_views = float(views_raw)
+                    except Exception as err:
+                        unit = views_raw[-1]
+                        number_of_views = float(views_raw[:-1]) * units[unit]
                 except Exception as err:
                     number_of_views = 0
 
