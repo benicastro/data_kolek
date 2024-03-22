@@ -120,11 +120,22 @@ class TelegramScraper:
                     for tag in a_tags:
                         extracted_urls.append(tag.attrs["href"])
 
-                username = ""
-                username_link = ""
+                # Extract the username and user link of the one who posted
+                username_link = post.css_first(
+                    "a.tgme_widget_message_owner_name"
+                ).attrs["href"]
+                username = username_link.split("t.me/")[-1]
+
+                # Extract number of views
+                try:
+                    number_of_views = post.css_first(
+                        "span.tgme_widget_message_views"
+                    ).text()
+                except Exception as err:
+                    number_of_views = 0
+
                 post_link = ""
                 date = ""
-                number_of_views = 0
 
                 entry = self.get_entry(
                     channel_name=channel_name,
