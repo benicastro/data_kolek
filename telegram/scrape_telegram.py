@@ -6,7 +6,7 @@ import time
 import random
 import requests
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from selectolax.parser import HTMLParser
 from dataclasses import dataclass, asdict
 
@@ -54,7 +54,7 @@ class TelegramScraper:
         continue_scraping = True
         query_params = {"before": None}
 
-        # # Restrict the number of scraped items
+        # # Restrict the number of scraped items based on time
         # if channel_name in explored_channels:
         #     time_filter = 7  # 1 week - return to 7
         #     print(
@@ -145,10 +145,18 @@ class TelegramScraper:
                 # Extract the date when the post was made
                 date_node = post.css_first("a.tgme_widget_message_date")
                 date_raw = date_node.css_first("time").attrs["datetime"].split("T")[0]
-                post_date = datetime.strptime(date_raw, "%Y-%m-%d").strftime("%m/%d/%Y")
+                post_date = datetime.strptime(date_raw, "%Y-%m-%d")
+                post_date_str = post_date.strftime("%m/%d/%Y")
 
                 # Extract the post link
                 post_link = date_node.attrs["href"]
+
+                # # Add a condition for filtering posts
+                # time_diff = datetime.utcnow() - timedelta(days=time_filter)
+                # if post_date < time_diff:
+                #     print("[!] The current post is relatively outdated")
+                #     print(f"{len(posts_list)} posts returned.")
+                #     return posts_list
 
                 entry = self.get_entry(
                     channel_name=channel_name,
@@ -157,7 +165,7 @@ class TelegramScraper:
                     username_link=username_link,
                     post_text=post_text,
                     post_link=post_link,
-                    date=post_date,
+                    date=post_date_str,
                     number_of_views=number_of_views,
                     extracted_urls=extracted_urls,
                 )
