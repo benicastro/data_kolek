@@ -145,10 +145,10 @@ class TelegramScraper:
                 # Extract the date when the post was made
                 date_node = post.css_first("a.tgme_widget_message_date")
                 date_raw = date_node.css_first("time").attrs["datetime"].split("T")[0]
-                date = datetime.strptime(date_raw, "%Y-%m-%d").strftime("%m/%d/%Y")
+                post_date = datetime.strptime(date_raw, "%Y-%m-%d").strftime("%m/%d/%Y")
 
-                post_link_date = post.css_first("a.tgme_widget_message_date")
-                post_link = ""
+                # Extract the post link
+                post_link = date_node.attrs["href"]
 
                 entry = self.get_entry(
                     channel_name=channel_name,
@@ -157,7 +157,7 @@ class TelegramScraper:
                     username_link=username_link,
                     post_text=post_text,
                     post_link=post_link,
-                    date=date,
+                    date=post_date,
                     number_of_views=number_of_views,
                     extracted_urls=extracted_urls,
                 )
