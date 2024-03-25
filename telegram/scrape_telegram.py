@@ -5,8 +5,8 @@ from telegram_source import telegram_links
 import time
 import random
 import requests
-import datetime
 import pandas as pd
+from datetime import datetime
 from selectolax.parser import HTMLParser
 from dataclasses import dataclass, asdict
 
@@ -142,9 +142,13 @@ class TelegramScraper:
                 except Exception as err:
                     number_of_views = 0
 
+                # Extract the date when the post was made
+                date_node = post.css_first("a.tgme_widget_message_date")
+                date_raw = date_node.css_first("time").attrs["datetime"].split("T")[0]
+                date = datetime.strptime(date_raw, "%Y-%m-%d").strftime("%m/%d/%Y")
+
                 post_link_date = post.css_first("a.tgme_widget_message_date")
                 post_link = ""
-                date = ""
 
                 entry = self.get_entry(
                     channel_name=channel_name,
