@@ -7,7 +7,7 @@ import pyspark as spark
 from pyspark.sql import SparkSession
 
 # Google Sheets #################################################################
-sc = spark.sparkContext
+sc = spark.SparkContext
 
 gsheet_credential = utils_credentials.gsheet_credential
 
