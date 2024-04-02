@@ -1,9 +1,10 @@
 import gspread
 import utils_credentials
 
-import pyspark
+import pyspark as spark
 from pyspark.sql import SparkSession
 
+# Google Sheets #################################################################
 sc = spark.sparkContext
 
 gsheet_credential = utils_credentials.gsheet_credential
@@ -29,3 +30,6 @@ class GSheetsUtils:
         json_data = self.gs_to_dict(tab_name, spreadsheet_id)
         results_list = [result[relevant_key] for result in json_data]
         return results_list
+
+
+#################################################################################
