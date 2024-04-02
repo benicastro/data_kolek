@@ -1,4 +1,6 @@
 import gspread
+import tldextract
+import validators
 import utils_credentials
 
 import pyspark as spark
@@ -30,6 +32,20 @@ class GSheetsUtils:
         json_data = self.gs_to_dict(tab_name, spreadsheet_id)
         results_list = [result[relevant_key] for result in json_data]
         return results_list
+
+
+#################################################################################
+
+# Domain Extraction #############################################################
+
+
+def extract_domain(url: str) -> str:
+    """This function checks wether the input url string is a valid domain name,
+    and then returns the domain."""
+    domain = f"{tldextract.extract(url).domain}.{tldextract.extract(url).suffix}"
+    if not bool(validators.domain(domain)):
+        domain = f"{tldextract.extract(url).subdomain}.{tldextract.extract(url).domain}"
+    return domain
 
 
 #################################################################################
