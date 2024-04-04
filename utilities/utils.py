@@ -49,3 +49,11 @@ def extract_domain(url: str) -> str:
 
 
 #################################################################################
+
+# URLs ##########################################################################
+
+
+def is_url(url: str) -> bool:
+    """This function checks wether the input url string is valid and returns a
+    boolean value."""
+    return url.startswith("http://") or url.startswith("https://")
